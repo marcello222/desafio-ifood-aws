@@ -39,7 +39,7 @@ public class CategoryIntegrationTest {
 
     @Test
     public void testGetCategory() throws Exception {
-        CategoryDto categoryDto = CategoryDtoTemplate.getDefaultCategoryDto();
+        CategoryDto categoryDto = CategoryDtoTemplate.CategoryTemplate();
 
         MvcResult result = mockMvc.perform(post("/api/category")
                         .contentType(MediaType.APPLICATION_JSON)

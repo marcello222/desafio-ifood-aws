@@ -3,14 +3,14 @@ package com.marcello222.desafio_ifood.entities.product;
 
 import com.marcello222.desafio_ifood.domain.ProductDto;
 import com.marcello222.desafio_ifood.entities.category.Category;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @Document(collection = "products")
 public class Product {

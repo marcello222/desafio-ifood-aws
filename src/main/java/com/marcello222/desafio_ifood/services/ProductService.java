@@ -7,6 +7,8 @@ import com.marcello222.desafio_ifood.exceptions.CategoryNotFoundException;
 import com.marcello222.desafio_ifood.exceptions.ProductNotFoundException;
 import com.marcello222.desafio_ifood.mapper.ProductMapper;
 import com.marcello222.desafio_ifood.repositories.ProductRepository;
+import com.marcello222.desafio_ifood.services.aws.AwsSnsService;
+import com.marcello222.desafio_ifood.services.aws.MessageDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,19 +22,28 @@ public class ProductService {
 
     private final ProductMapper productMapper;
 
-    public ProductService(ProductRepository productRepository, CategoryService categoryService, ProductMapper productMapper) {
+    private final AwsSnsService awsSnsService;
+
+    public ProductService(ProductRepository productRepository, CategoryService categoryService, ProductMapper productMapper, AwsSnsService awsSnsService) {
         this.productRepository = productRepository;
         this.categoryService = categoryService;
         this.productMapper = productMapper;
+        this.awsSnsService = awsSnsService;
     }
 
     public Product createdProduct(ProductDto productDto) {
         Category category = this.categoryService.getById(productDto.getCategoryId()).orElseThrow(
                 ProductNotFoundException::new);
 
-        Product product = this.productMapper.toEntity(productDto);
-        product.setCategory(category);
-        return this.productRepository.save(product);
+        Product newProduct = this.productMapper.toEntity(productDto);
+        newProduct.setCategory(category);
+
+        this.productRepository.save(newProduct);
+
+        this.awsSnsService.publish(new MessageDto(newProduct.getOwnerId()));
+
+        return newProduct;
+
     }
 
     public List<Product> getAllProduct() {
@@ -48,7 +59,6 @@ public class ProductService {
             this.categoryService.getById(productDto.getCategoryId()).ifPresent(product::setCategory);
         }
 
-
         Product updatedProduct = this.productMapper.toEntity(productDto);
 
         if (!updatedProduct.getTitle().isEmpty()) {
@@ -61,7 +71,11 @@ public class ProductService {
             product.setPrice(productDto.getPrice());
         }
 
-        return this.productRepository.save(product);
+        this.productRepository.save(product);
+
+        this.awsSnsService.publish(new MessageDto(product.getOwnerId()));
+
+        return product;
     }
 
     public void deleteProduct(String id) {
@@ -70,4 +84,8 @@ public class ProductService {
         this.productRepository.delete(product);
     }
 
+    public Product getProductById(String id) {
+        return this.productRepository.findById(id).orElseThrow(
+                ProductNotFoundException::new);
+    }
 }

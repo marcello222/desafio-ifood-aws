@@ -1,15 +1,12 @@
 package com.marcello222.desafio_ifood.entities.category;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @Document(collection = "categories")
 public class Category {
